@@ -52,10 +52,11 @@ class xml_obj_det():
             file_name = self.__get_file_name()
             self.__files_names.append(file_name)
             self.__files_path.append(f"{path}/{file_name}")
-            bndboxe = self.__get_bndboxe()
-            self.__bndboxes.append(bndboxe)
             diminsions = self.__get_height_width()
             self.__diminsions.append(diminsions)
+            bndboxe = self.__get_bndboxe()
+            self.__bndboxes.append(bndboxe)
+
             label = self.__get_label()
             self.__labels.append(label)
             self.__set_uniq_labels(label)
@@ -80,17 +81,17 @@ class xml_obj_det():
     # -------------------------------------
     def __get_height_width(self):
         sizes = self.root.find("size")
-        width = float(sizes[0].text)
-        height = float(sizes[1].text)
-        depth = float(sizes[2].text)
-        return [width,height,depth]
+        self.width = float(sizes[0].text)
+        self.height = float(sizes[1].text)
+        self.depth = float(sizes[2].text)
+        return [self.width,self.height,self.depth]
     # ----------------------------------
     def __get_bndboxe(self):
         bndbox = self.object.find("bndbox")
-        xmin = float(bndbox[0].text) #np.array(bndbox[0].text,dtype=np.float32)
-        ymin = float(bndbox[1].text) #np.array(bndbox[1].text,dtype=np.float32)
-        xmax = float(bndbox[2].text) #np.array(bndbox[2].text,dtype=np.float32)
-        ymax = float(bndbox[3].text) #np.array(bndbox[3].text,dtype=np.float32)
+        xmin = float(bndbox[0].text) / self.width
+        ymin = float(bndbox[1].text) / self.height
+        xmax = float(bndbox[2].text) / self.width
+        ymax = float(bndbox[3].text) / self.height
 
         return np.array([[ymin,xmin,ymax,xmax]],dtype=np.float32)
     # ----------------------------------
