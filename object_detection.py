@@ -1,6 +1,7 @@
 import xml.etree.ElementTree as ET
 import glob
 
+import numpy as np
 class xml_obj_det():
     def __init__(self,main_dir_path):
         """
@@ -27,7 +28,9 @@ class xml_obj_det():
         self.__num_labels=0
         # To handle the test set based on the train set
         self.__num_fit=0
+        self.__category_index = None
         self.fit_data()
+        self.__set_category_index()
     # ----------------------------------
     def fit_data(self, path=None):
         """
@@ -57,7 +60,7 @@ class xml_obj_det():
             self.__labels.append(label)
             self.__set_uniq_labels(label)
         self.__encode_labels()
-        self.__combine_labels()
+       # self.__combine_labels()
     # ---------------------------------
     def __rest_data(self):
         self.__files_path = []
@@ -84,12 +87,12 @@ class xml_obj_det():
     # ----------------------------------
     def __get_bndboxe(self):
         bndbox = self.object.find("bndbox")
-        xmin = float(bndbox[0].text)
-        ymin = float(bndbox[1].text)
-        xmax = float(bndbox[2].text)
-        ymax = float(bndbox[3].text)
+        xmin = float(bndbox[0].text) #np.array(bndbox[0].text,dtype=np.float32)
+        ymin = float(bndbox[1].text) #np.array(bndbox[1].text,dtype=np.float32)
+        xmax = float(bndbox[2].text) #np.array(bndbox[2].text,dtype=np.float32)
+        ymax = float(bndbox[3].text) #np.array(bndbox[3].text,dtype=np.float32)
 
-        return [xmin,ymin,xmax,ymax]
+        return np.array([[ymin,xmin,ymax,xmax]],dtype=np.float32)
     # ----------------------------------
     def __get_file_name(self):
         return self.root.find("filename").text
@@ -107,6 +110,12 @@ class xml_obj_det():
     def __encode_labels(self):
         for i,label in enumerate(self.__labels):
             self.__labels[i] = self.__uniq_labels.index(label)
+    # ---------------------------
+    def __set_category_index(self):
+        dic = {}
+        for i,label in enumerate(self.__labels):
+            dic.update({f'{label}_class_id':{"id":i+1,"name": "label"}})
+        self.__category_index = dic
     # ---------------------------
     def __combine_labels(self):
         for i in range(len(self.__labels)):
@@ -135,3 +144,5 @@ class xml_obj_det():
     def get_combined_labels(self):
         return self.__combined_labels
 
+    def get_category_index(self):
+        return self.__category_index
